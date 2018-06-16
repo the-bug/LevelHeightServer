@@ -21,19 +21,19 @@ void setup() {
   Serial.begin(9600); // Starts the serial communication
 
   connectToWlan();
-  //  resolveLevelHeightServerLocation();
+  resolveLevelHeightServerLocation();
 }
 
 void resolveLevelHeightServerLocation() { 
     while(true) {
-      Serial.println("Start to resolving levelHeightServerLocation with " + String(configurationRessource));   
+      Serial.println("Start to resolving levelHeightServerLocation with " + String(configurationRessourceHost) + String(configurationRessourceUri));   
       
       if(WiFi.status()== WL_CONNECTED) {   //Check WiFi connection status
  
         HTTPClient http;    //Declare object of class HTTPClient
  
-        http.begin(String(configurationRessource), String(configurationRessourcetThumbprint));      //Specify request destination
-        http.addHeader("Content-Type", "text/plain");  //Specify content-type header
+        http.begin(String(configurationRessourceHost) + String(configurationRessourceUri));      //Specify request destination
+        // http.addHeader("Content-Type", "text/plain");  //Specify content-type header
  
         int httpCode = http.GET();   //Send the request
 
@@ -45,6 +45,7 @@ void resolveLevelHeightServerLocation() {
           Serial.println(httpCode);   //Print HTTP return code
           Serial.println(payload);    //Print request response payload
           levelHeightServerLocation = payload;
+          return;
         
         } else {
           Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
