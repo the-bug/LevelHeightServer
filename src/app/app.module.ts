@@ -4,6 +4,8 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
+import { MatButtonModule, MatCheckboxModule } from '@angular/material';
+import { HttpClientModule } from '@angular/common/http';
 
 
 const appRoutes: Routes = [
@@ -15,7 +17,7 @@ const appRoutes: Routes = [
   {
     path: '',
     redirectTo: 'Monitor',
-    pathMatch: 'full' 
+    pathMatch: 'full'
   },
   {
     path: '**',
@@ -31,7 +33,10 @@ const appRoutes: Routes = [
     BrowserModule,
     RouterModule.forRoot(
       appRoutes
-    )
+    ),
+    MatButtonModule,
+    MatCheckboxModule,
+    HttpClientModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
