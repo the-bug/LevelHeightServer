@@ -1,12 +1,6 @@
 #include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
 #include "configurations/configKornburg.h"
-
-const char* ssid = wLanSsid;
-const char* password = wLanPasswort;
-
-// IPAddress ip(192, 168, 2, 115); //set static ip
- 
-WiFiServer server(80);
 
 const int trigPin2 = 15;  // D8
 const int echoPin2 = 13;  // D7
@@ -24,75 +18,46 @@ void setup() {
   
   Serial.begin(9600); // Starts the serial communication
 
-   delay(10);
-  
-  // Connect to WiFi network
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
- 
-  WiFi.begin(ssid, password);
- 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.println("WiFi connected");
- 
-  // Start the server
-  server.begin();
-  Serial.println("Server started");
- 
-  // Print the IP address
-  Serial.print("Use this URL to connect: ");
-  Serial.print("http://");
-  Serial.print(WiFi.localIP());
-  Serial.println("/");
-
+  connectToWlan();
 }
+
+
 
 void loop() {
-
-   // Check if a client has connected
-  WiFiClient client = server.available();
-  if (!client) {
-    return;
-  }
- 
-  // Wait until the client sends some data
-  // Serial.println("new client");
-  while(!client.available()){
-    delay(1);
-  }
-  client.flush();
- 
-  // Set ledPin according to the request
-  // digitalWrite(ledPin, value);
- 
-  // Return the response
-  client.println("HTTP/1.1 200 OK");
-  client.println("Content-Type: text/html");
-  client.println(""); //  do not forget this one
-  client.println("<!DOCTYPE HTML>");
-  client.println("<html>");  
+  getDistance(trigPin1, echoPin1);
+  getDistance(trigPin2, echoPin2);
    
-  client.print("Distance1 is now ");
-  client.print(getDistance(trigPin1, echoPin1));
-  client.print(" cm<br>");
+ if(WiFi.status()== WL_CONNECTED) {   //Check WiFi connection status
  
-  client.print("Distance2 is now ");
-  client.print(getDistance(trigPin2, echoPin2));
-  client.print(" cm<br>");
-  
-  client.println("</html>");
+   HTTPClient http;    //Declare object of class HTTPClient
  
-  delay(1);
-  Serial.println("Client disonnected");
-  Serial.println("");
+   http.begin(String(levelHeightServerLocation) + "/Measurements");      //Specify request destination
+   http.addHeader("Content-Type", "application/json");  //Specify content-type header
+ 
+   int httpCode = http.POST(createJsonPostBody());   //Send the request
+   String payload = http.getString();                  //Get the response payload
+ 
+   Serial.println(httpCode);   //Print HTTP return code
+   Serial.println(payload);    //Print request response payload
+ 
+   http.end();  //Close connection
+ 
+ }
+ else { 
+    Serial.println("Error in WiFi connection");    
+ } 
+ 
+ delay(3000);  //Send a request every 3 seconds
 
 }
+
+String createJsonPostBody () {
+  return "{\"distanceFromSensor1\": \"" + String(getDistance(trigPin1, echoPin1)) + "\",\"distanceFromSensor2\": \"" + getDistance(trigPin2, echoPin2) + "\"}";
+}
+
+
+
+
 
 int getDistance(const int trigPin, const int echoPin) {      
   // Clears the trigPin1
@@ -107,5 +72,25 @@ int getDistance(const int trigPin, const int echoPin) {
   // Reads the echoPin1, returns the sound wave travel time in microseconds
   // Calculating the distance
   return pulseIn(echoPin, HIGH)*0.034/2;
+}
+
+void connectToWlan() {
+  delay(10);
+  
+  // Connect to WiFi network
+  Serial.println();
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(wLanSsid);
+
+ 
+  WiFi.begin(wLanSsid, wLanPasswort);
+ 
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected");
 }
 
