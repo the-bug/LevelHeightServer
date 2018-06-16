@@ -7,5 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface MeasurementRepository extends JpaRepository<Measurement, Long> {
 
 	// List<Measurement> findAll();
-
+	List<Measurement> findTop50ByOrderByMeasurementTimeDesc();
+	Measurement findTop1ByOrderByMeasurementTimeDesc();
 }

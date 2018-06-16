@@ -26,7 +26,7 @@ public class MeasurementRestController {
 
 	@GetMapping
 	List<Measurement> readMeasurement() {
-		return this.measurementRepository.findAll();
+		return this.measurementRepository.findTop50ByOrderByMeasurementTimeDesc();
 	}
 
 	@PostMapping
