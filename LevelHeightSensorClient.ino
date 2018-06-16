@@ -8,6 +8,8 @@ const int echoPin2 = 13;  // D7
 const int trigPin1 = 5;  // D1
 const int echoPin1 = 4;  // D2
 
+String levelHeightServerLocation = levelHeightServerLocationHardcoded;
+
 void setup() {
   
   pinMode(trigPin1, OUTPUT); // Sets the trigPin1 as an Output
@@ -19,15 +21,55 @@ void setup() {
   Serial.begin(9600); // Starts the serial communication
 
   connectToWlan();
+  //  resolveLevelHeightServerLocation();
+}
+
+void resolveLevelHeightServerLocation() { 
+    while(true) {
+      Serial.println("Start to resolving levelHeightServerLocation with " + String(configurationRessource));   
+      
+      if(WiFi.status()== WL_CONNECTED) {   //Check WiFi connection status
+ 
+        HTTPClient http;    //Declare object of class HTTPClient
+ 
+        http.begin(String(configurationRessource), String(configurationRessourcetThumbprint));      //Specify request destination
+        http.addHeader("Content-Type", "text/plain");  //Specify content-type header
+ 
+        int httpCode = http.GET();   //Send the request
+
+
+        if (httpCode > 0) {
+        
+          String payload = http.getString();                  //Get the response payload
+ 
+          Serial.println(httpCode);   //Print HTTP return code
+          Serial.println(payload);    //Print request response payload
+          levelHeightServerLocation = payload;
+        
+        } else {
+          Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+        }
+        
+        http.end();  //Close connection
+ 
+      }
+      else { 
+        Serial.println("Error in WiFi connection");    
+      } 
+ 
+      delay(3000);  //Send a request every 3 seconds
+      
+    }
 }
 
 
 
-void loop() {
-  getDistance(trigPin1, echoPin1);
-  getDistance(trigPin2, echoPin2);
-   
+
+
+void loop() {   
  if(WiFi.status()== WL_CONNECTED) {   //Check WiFi connection status
+  
+   Serial.println("Sending Measurment to " + String(levelHeightServerLocation));    
  
    HTTPClient http;    //Declare object of class HTTPClient
  
@@ -38,7 +80,11 @@ void loop() {
    String payload = http.getString();                  //Get the response payload
  
    Serial.println(httpCode);   //Print HTTP return code
-   Serial.println(payload);    //Print request response payload
+   Serial.println(payload);    //Print request response payload           
+
+   if (httpCode < 0) {
+     Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
+   }
  
    http.end();  //Close connection
  
@@ -54,10 +100,6 @@ void loop() {
 String createJsonPostBody () {
   return "{\"distanceFromSensor1\": \"" + String(getDistance(trigPin1, echoPin1)) + "\",\"distanceFromSensor2\": \"" + getDistance(trigPin2, echoPin2) + "\"}";
 }
-
-
-
-
 
 int getDistance(const int trigPin, const int echoPin) {      
   // Clears the trigPin1
