@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MeasurmentsRestDTO } from './../MeasurmentsRestDTO';
 import { SensorData } from '../one-sensor-evoluter/SensorData';
+import { interval } from 'rxjs';
 
 @Component({
   selector: 'app-result-view',
@@ -15,12 +16,18 @@ export class ResultViewComponent implements OnInit {
   sensorData1: Array<SensorData>;
   sensorData2: Array<SensorData>;
 
+  intervallSubscription;
+
   constructor(private http: HttpClient) { }
 
   ngOnInit() {
     this.getNewData();
+    this.subscribeToData();
   }
 
+  private subscribeToData(): void {
+    this.intervallSubscription = interval(1000).subscribe(() => this.getNewData());
+  }
 
   private getNewData() {
     const newLocal = 'http://localhost:8080' + '/Measurements';
