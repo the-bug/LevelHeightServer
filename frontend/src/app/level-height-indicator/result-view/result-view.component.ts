@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { MeasurmentsRestDTO } from './../MeasurmentsRestDTO';
 import { SensorData } from '../one-sensor-evoluter/SensorData';
 import { interval } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-result-view',
@@ -30,7 +31,7 @@ export class ResultViewComponent implements OnInit {
   }
 
   private getNewData() {
-    const newLocal = 'http://localhost:8080' + '/Measurements';
+    const newLocal = environment.endpoint + '/Measurements';
     this.http.get<MeasurmentsRestDTO[]>(newLocal).subscribe(t => {
       this.actuellData = t;
       this.sensorData1 = this.actuellData.map(dto => {
