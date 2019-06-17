@@ -1,0 +1,7 @@
+plugins {
+  id 'java'
+}
+// 4
+jar {
+  from 'dist/LevelHeightIndicator' into 'static'
+}
