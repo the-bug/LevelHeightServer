@@ -1,6 +1,6 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
-#include "configurations/configKornburg.h"
+#include "configurations/configKainsbach.h"
 
 const int trigPin2 = 15;  // D8
 const int echoPin2 = 13;  // D7
@@ -21,7 +21,9 @@ void setup() {
   Serial.begin(9600); // Starts the serial communication
 
   connectToWlan();
-  resolveLevelHeightServerLocation();
+  if(false) {
+    resolveLevelHeightServerLocation();
+  }
 }
 
 void resolveLevelHeightServerLocation() { 
